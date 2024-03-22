@@ -1,0 +1,60 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "linux-arm64-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model ms_smtp {
+  id              Int        @id @default(autoincrement())
+  id_massa        String     @db.VarChar(150)
+  priority        Int
+  status          String     @db.VarChar(50)
+  interval           Float?
+  smtp_name       String     @db.VarChar(150)
+  smtp_host     String     @db.VarChar(150)
+  smtp_email      String     @db.VarChar(150)
+  smtp_user       String     @db.VarChar(150)
+  smtp_pwd        String     @db.VarChar(150)
+  smtp_port       Int
+  smtp_encryption String     @db.VarChar(50)
+  smtp_auth       String     @db.VarChar(50)
+  smtp_email_reply String     @db.VarChar(150)
+  email_subject   String?    @db.VarChar(254)
+  email_msg       String?    @db.LongText
+  email_attach    String?    @db.LongText
+  ms_user         ms_user    @relation(fields: [ms_user_id], references: [id])
+  ms_user_id      Int
+  ms_email        ms_email[]
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+}
+
+model ms_user {
+  id      Int       @id @default(autoincrement())
+  user    String    @unique(map: "user") @db.VarChar(50)
+  nivel   String    @db.VarChar(50)
+  token  String?    @unique(map: "token") @db.VarChar(150)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+  password                    String
+  salt                        String
+
+  ms_smtp ms_smtp[]
+}
+
+model ms_email {
+  id         Int     @id @default(autoincrement())
+  email      String  @db.VarChar(150)
+  ms_smtp    ms_smtp @relation(fields: [ms_smtp_id], references: [id])
+  ms_smtp_id Int
+  created_at   DateTime @default(now())
+  status     String  @db.VarChar(50)
+  error_message String?    @db.LongText
+  attachment String?    @db.LongText
+  variables       String?    @db.LongText
+
+}

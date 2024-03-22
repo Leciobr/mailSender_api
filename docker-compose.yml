@@ -1,0 +1,20 @@
+version: "3.7" # optional since v1.27.0
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: aispemge-api-email-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mailsender
+      MYSQL_USER: aispemge
+      MYSQL_PASSWORD: server123
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db_data:/var/lib/mysql
+    networks:
+      - aispemge_network
+networks:
+  aispemge_network:
+volumes:
+  db_data: null
