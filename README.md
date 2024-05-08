@@ -12,7 +12,7 @@
 ## How to Start
 - Para executar a API rodar o comando `npm run start`
 - Para executar o cron que envia os emails adicionar ao cron do SO para executar o seguindo comando:
-`npm run start-cron`
+`npm run start-sender-job`
 
 ### Cron Sample:
 Executar:

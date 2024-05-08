@@ -107,21 +107,23 @@ const sendEmails = async (schedule: any, emails: any) => {
           return variables[key.trim()] || match;
         })
       })
-
+      
       const mailOptions = {
         from: schedule.smtp_email,
         to: emailRef.email,
         subject: subject,
         html: msg,
-        attachments: [],
+        replyTo: schedule.smtp_email_reply,
+        attachments: emailRef.attachment.split(';').map((file: string) => ({path: file})),
       } as Mail.Options
   
       const task = new Promise((resolve, reject) => {
         smtp.mailer(
           schedule.smtp_host,
           schedule.smtp_port,
-          // schedule.smtp_encryption === 'SSL',
-          false,
+          // schedule.smtp_encryption === 'SSL', true,
+          ((schedule.smtp_encryption=='SSL' || schedule.smtp_encryption=='TLS') 
+            && schedule.smtp_port==465) ? true : false, 
           schedule.smtp_user,
           schedule.smtp_pwd,
         ).sendMail(mailOptions, async (error, info) => {
