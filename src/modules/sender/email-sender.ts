@@ -71,18 +71,45 @@ const emailSender = async () => {
   for (const schedule of schedules) {
     const emails = schedule.ms_email;
 
-    const totals = await sendEmails(schedule, emails)
+    // const totals = await sendEmails(schedule, emails)
+    await sendEmails(schedule, emails)
 
-    const allSent = totals[EmailStatus.SENT] === emails.length;
-    const allError = totals[EmailStatus.ERROR] === emails.length;
-    const someWithErrors = !allError && totals[EmailStatus.ERROR] > 0;
+    // const allSent = totals[EmailStatus.SENT] === emails.length;
+    // const allError = totals[EmailStatus.ERROR] === emails.length;
+    // const someWithErrors = !allError && totals[EmailStatus.ERROR] > 0;
 
+    // Contagem total de emails para um ms_smtp_id específico
+  const totalEmails = await prisma.ms_email.count({
+      where: {
+          ms_smtp_id: schedule.id
+      }
+  });
+
+  // Contagem de emails enviados para um ms_smtp_id específico
+  const totalSent = await prisma.ms_email.count({
+      where: {
+          ms_smtp_id: schedule.id,
+          status: Statuses.SENT
+      }
+  });
+
+  // Contagem de emails com erro para um ms_smtp_id específico
+  const totalError = await prisma.ms_email.count({
+    where: {
+        ms_smtp_id: schedule.id,
+        status: Statuses.ERROR
+    }
+});
+
+  const allSent = totalSent === totalEmails;
+  const allError = totalError === totalEmails;
+  
     await prisma.ms_smtp.update({
       where: {
         id: schedule.id
       },
       data: {
-        status: allSent ? Statuses.SENT : someWithErrors ? Statuses.SENT_WITH_ERRORS : Statuses.ERROR,
+        status: allSent ? Statuses.SENT : allError ? Statuses.ERROR : Statuses.SENT_WITH_ERRORS,
       }
     })
   }
@@ -90,10 +117,10 @@ const emailSender = async () => {
 
 
 const sendEmails = async (schedule: any, emails: any) => {
-  const totals = {
-    [EmailStatus.SENT]: 0,
-    [EmailStatus.ERROR]: 0,
-  }
+  // const totals = {
+  //   [EmailStatus.SENT]: 0,
+  //   [EmailStatus.ERROR]: 0,
+  // }
 
   for (const emailRef of emails) {
     try {
@@ -147,11 +174,31 @@ const sendEmails = async (schedule: any, emails: any) => {
           status: EmailStatus.SENT
         }
       })
-      totals[EmailStatus.SENT]++
+      // totals[EmailStatus.SENT]++
   
       if(schedule.interval) {
         await sleep(schedule.interval)
       }
+
+
+    //ver se tem algum e-mail com maior prioridade de envio
+    const result = await prisma.ms_email.count({
+      where: {
+        status: EmailStatus.PENDING,
+        ms_smtp_id: {
+          gt: schedule.id
+        },
+        ms_smtp: {
+          priority: {
+            lt: schedule.priority
+          }
+        }
+      }
+    });
+    if (result > 0) await emailSender();
+
+
+
     } catch (error:any) {
       console.log('ERROR:', error)
       await prisma.ms_email.update({
@@ -163,11 +210,11 @@ const sendEmails = async (schedule: any, emails: any) => {
           error_message: error.message
         }
       })
-      totals[EmailStatus.ERROR]++
+      // totals[EmailStatus.ERROR]++
     }
   }
 
-  return totals;
+  // return totals;
 }
 
 export default emailSender

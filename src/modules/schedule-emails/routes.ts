@@ -7,6 +7,8 @@ import { authMiddleware, validateBodySchema } from '../../middlewares'
 import { scheduleEmailPayloadValidator } from './schema'
 import getScheduleEmails from './actions/get-schedule-emails'
 
+import email_sender_job from '../../cron/email-sender-job';
+
 const scheduleRoutes = express.Router()
 
 scheduleRoutes.post(
@@ -23,10 +25,12 @@ scheduleRoutes.post(
     };
 
     const schedule = await createSchedule(body);
+    
     res.json(schedule);
   } catch (error) {
     next(error);
   }
+  await email_sender_job();
 })
 
 scheduleRoutes.get(
@@ -75,8 +79,6 @@ scheduleRoutes.delete(
     }
   }
 );
-
-
 
 export default scheduleRoutes
 
