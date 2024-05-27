@@ -2,7 +2,7 @@
   // "type": "module",
   "compilerOptions": {
     "lib": ["es2017"],
-    "module": "CommonJS",
+    "module": "esnext",
     "moduleResolution": "node",
     "types": ["node"],
     "resolveJsonModule": true,
@@ -40,5 +40,5 @@
       "module": "CommonJS"
     }
   },
-  "exclude": ["./dist//", "./node_modules//"]
+  "exclude": ["./dist/**/*", "./node_modules/**/*"]
 }
