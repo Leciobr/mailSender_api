@@ -135,13 +135,19 @@ const sendEmails = async (schedule: any, emails: any) => {
         })
       })
       
+      let attachmentStr:any
+      if ((emailRef.attachment && emailRef.attachment != null && emailRef.attachment.length > 2)) {
+        attachmentStr=emailRef.attachment.split(';').map((file: string) => ({path: file}));
+       } else {
+        attachmentStr = null;
+      }
       const mailOptions = {
         from: schedule.smtp_email,
         to: emailRef.email,
         subject: subject,
         html: msg,
         replyTo: schedule.smtp_email_reply,
-        attachments: emailRef.attachment.split(';').map((file: string) => ({path: file})),
+        attachments: attachmentStr,
       } as Mail.Options
   
       const task = new Promise((resolve, reject) => {
