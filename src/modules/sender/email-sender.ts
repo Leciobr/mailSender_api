@@ -130,7 +130,7 @@ const sendEmails = async (schedule: any, emails: any) => {
         schedule.email_subject,
         schedule.email_msg
       ].map((text:any) => {
-        return text.replaceAll("\\{", "{").replaceAll("\\}", "}").replace(/{{(.*?)}}/g, (match:any, key:any) => {
+        return text.replaceAll("%7B","{").replaceAll("%7D", "}") .replaceAll("\\{", "{").replaceAll("\\}", "}").replace(/{{(.*?)}}/g, (match:any, key:any) => {
           return variables[key.trim()] || match;
         })
       })
