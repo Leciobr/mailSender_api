@@ -142,7 +142,7 @@ const sendEmails = async (schedule: any, emails: any) => {
         attachmentStr = null;
       }
       const mailOptions = {
-        from: schedule.smtp_email,
+        from: `${schedule.smtp_name} <${schedule.smtp_email}>`,
         to: emailRef.email,
         subject: subject,
         html: msg,
@@ -154,7 +154,6 @@ const sendEmails = async (schedule: any, emails: any) => {
         smtp.mailer(
           schedule.smtp_host,
           schedule.smtp_port,
-          // schedule.smtp_encryption === 'SSL', true,
           ((schedule.smtp_encryption=='SSL' || schedule.smtp_encryption=='TLS') 
             && schedule.smtp_port==465) ? true : false, 
           schedule.smtp_user,
